@@ -148,7 +148,7 @@ def parse_all_tables(data):
 
 #Sets up XML file to be parsed; takes filename as argument
 def xml_parse(file_name):
-    global patcit_table, nplcit_table, all_tables
+    #global patcit_table, nplcit_table, all_tables
     
     #tree = ET.parse('US09670210-20170606.XML')
     tree = ET.parse(file_name)
@@ -165,3 +165,5 @@ def xml_parse(file_name):
     patcit_table, nplcit_table = parse_all_citations(citations)
 
     all_tables = parse_all_tables(data)
+
+    return patcit_table, nplcit_table,all_tables
