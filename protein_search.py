@@ -4,6 +4,10 @@ import random
 
 def search():
 
+    # Path to directory of pickled variables
+    # TODO
+    FILE_PATH = ''
+
     def display(indeces):
         for i in indeces:
             print(entries[int(indeces_only[i])]) 
@@ -23,8 +27,8 @@ def search():
             print('Name not Found')
 
     # load variable from disk
-    entries = pickle.load(open("C:/Users/cjaik/Documents/vscode/protein_dict.p","rb"))
-    all_names = pickle.load(open("C:/Users/cjaik/Documents/vscode/names_list.p","rb"))
+    entries = pickle.load(open(FILE_PATH + "protein_dict.p","rb"))
+    all_names = pickle.load(open(FILE_PATH + "names_list.p","rb"))
     names_only = [x.split(':::')[0] for x in all_names]
     indeces_only = [x.split(':::')[1] for x in all_names]
 

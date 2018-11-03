@@ -11,7 +11,9 @@ file3 = 'C:/Users/cjaik/Documents/vscode/uniprot_sprot.xml'
 
 def UNIPROT_parse(file_name):
 
-    index = 0   # Index of each entry
+    # Path to directory of pickled variables
+    # TODO
+    FILE_PATH = ''
 
     protein_attributes = dict() # Dictionary entry for protein names
     organism_attributes = dict() # Dictionary entry for organism name
@@ -31,14 +33,15 @@ def UNIPROT_parse(file_name):
 
     # Name space of xml elements
     ns = "{http://uniprot.org/uniprot}"
-
+    
+    index = 0   # Index of each entry
 
     # When program encounters a protein. Method reads children of protein, looking for text
-    def parse_protein(protein,protein_attributes,path):
+    def parse_element(element,elem_attributes,path):
         nonlocal last
         nonlocal ec_name
 
-        for name in protein.iter():
+        for name in element.iter():
             if name.tag == (ns + 'protein') or name.tag == (ns + 'organism'):
                 continue
             else:
@@ -58,9 +61,9 @@ def UNIPROT_parse(file_name):
                     # If ecNumber encountered, attach associated name
                     if name.tag == (ns + 'ecNumber'):
                         
-                        protein_attributes.setdefault('/'.join(short_path),[]).append(name.text+' ('+ec_name+')')
+                        elem_attributes.setdefault('/'.join(short_path),[]).append(name.text+' ('+ec_name+')')
                     else:
-                        protein_attributes.setdefault('/'.join(short_path),[]).append(name.text)
+                        elem_attributes.setdefault('/'.join(short_path),[]).append(name.text)
                     
                     # Set text incase encounter ec_number next iteration
                     ec_name = name.text
@@ -81,7 +84,7 @@ def UNIPROT_parse(file_name):
                             last = False
                 
         
-        return protein_attributes
+        return elem_attributes
 
     for event, elem in ET.iterparse(file_name, events=("start", "end")):
 
@@ -97,12 +100,12 @@ def UNIPROT_parse(file_name):
                 all_names.append(elem.text.lower()+':::'+str(index))
 
             elif elem.tag == (ns + 'protein'):
-                protein_attributes = parse_protein(elem,protein_attributes,path)
+                protein_attributes = parse_element(elem,protein_attributes,path)
                 
                 #index += 1
             
             elif elem.tag == (ns + 'organism'):
-                organism_attributes = parse_protein(elem,organism_attributes,path) 
+                organism_attributes = parse_element(elem,organism_attributes,path) 
 
             elif elem.tag == (ns + 'entry'):
                 elem.clear()
@@ -114,8 +117,8 @@ def UNIPROT_parse(file_name):
             path.pop()
     
     #Change to desired path
-    pickle.dump(entries,open("protein_dict.p","wb"))
-    pickle.dump(all_names,open("names_list.p","wb"))
+    pickle.dump(entries,open(FILE_PATH + "protein_dict.p","wb"))
+    pickle.dump(all_names,open(FILE_PATH + "names_list.p","wb"))
 
 
 UNIPROT_parse(file2)
