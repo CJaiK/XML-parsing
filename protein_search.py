@@ -1,27 +1,14 @@
 import pickle
 import bisect
+import random
+
 def search():
 
     def display(indeces):
         for i in indeces:
-            print(entries[int(indeces_only[i])])
+            print(entries[int(indeces_only[i])]) 
 
     def find(names_only,name,indeces):
-        i = bisect.bisect_left(names_only,name)
-
-        if i != len(names_only) and names_only[i] == name:
-            # Find names that exist in multiple entries
-            indeces.append(i)
-            i += 1
-            while(i < len(names_only) and names_only[i] == name):
-                indeces.append(i)
-                i += 1
-            display(indeces)
-            indeces = []
-        else:
-            print('Name not Found')
-    
-    def find_linear(names_only,name,indeces):
         for i in range(len(names_only)):
             if names_only[i] == name:
                 indeces.append(i)
@@ -29,6 +16,7 @@ def search():
                 while(i < len(names_only) and names_only[i] == name):
                     indeces.append(i)
                     i+=1
+                break
         if indeces != []:
             display(indeces)
         else:
@@ -52,10 +40,16 @@ def search():
 
         name = input('Search: ').lower()
 
+        # Generate a random name for testing
+        if name == 'genname':
+            print(names_only[random.randint(0,len(names_only)-1)])
+            continue
+
         if name == 'end':
             break
         
-        find_linear(names_only,name,indeces)
+        
+        find(names_only,name,indeces)
         indeces = []
         
 search()

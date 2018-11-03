@@ -14,17 +14,15 @@ def UNIPROT_parse(file_name):
     index = 0   # Index of each entry
 
     protein_attributes = dict() # Dictionary entry for protein names
+    organism_attributes = dict() # Dictionary entry for organism name
     path = []   # List of all ancestors of current element
     entries = []  # list of protein entries
     child_group = []  # List of children
     all_names = [] # List of all names to be used for searching
 
     # Paths of each feature so program knows what the current element is
-    protein_path = ['uniprot','entry','protein']
-    name_path = ['uniprot','entry','name']
-    recommendedName_path = [protein_path,'recommendedName','fullName']
-    ecNumber_path = [protein_path,'recommendedName','ecNumber']
-    alternativeName_path = [protein_path,'alternativeName']
+    extra_path = ['uniprot','entry']  # Path segment in all entries; to be removed
+    name_path = ['uniprot','entry','name']   
 
     # Flag for when program encounters last child
     last = False
@@ -41,33 +39,35 @@ def UNIPROT_parse(file_name):
         nonlocal ec_name
 
         for name in protein.iter():
-            if name.tag == (ns + 'protein'):
+            if name.tag == (ns + 'protein') or name.tag == (ns + 'organism'):
                 continue
             else:
                 current_tag = name.tag.replace(ns,'')
                 path.append(current_tag)
 
                 # Program encounter element without text
-                if not re.search('[a-zA-Z0-9]',name.text):
+                if list(name) != [] and (name.text == None or not re.search('[a-zA-Z0-9]',name.text)):
                     # Tier that encompasses the different names (ie 'recommendedName')
                     if len(child_group) != 0 and name == child_group[-1][-1]:
                         last = True
                     child_group.append(list(name))
                     
                 else:
-
+                    
+                    short_path = [x for x in path if x not in extra_path]
                     # If ecNumber encountered, attach associated name
                     if name.tag == (ns + 'ecNumber'):
-                        protein_attributes.setdefault('/'.join(path),[]).append(name.text+' ('+ec_name+')')
+                        
+                        protein_attributes.setdefault('/'.join(short_path),[]).append(name.text+' ('+ec_name+')')
                     else:
-                        protein_attributes.setdefault('/'.join(path),[]).append(name.text)
+                        protein_attributes.setdefault('/'.join(short_path),[]).append(name.text)
                     
                     # Set text incase encounter ec_number next iteration
                     ec_name = name.text
 
                     # Add name to list of all names
-                    #all_names.append(name.text+':'+str(index))
-                    bisect.insort_left(all_names,name.text.lower()+':::'+str(index))
+                    if name.text != None:
+                        all_names.append(name.text.lower()+':::'+str(index))
 
                     path.pop()
 
@@ -83,43 +83,39 @@ def UNIPROT_parse(file_name):
         
         return protein_attributes
 
-    # Alternate method using 'paths' to determine category
-    # Keeps information about the hierarchy
-
-
     for event, elem in ET.iterparse(file_name, events=("start", "end")):
 
         if event == 'start':
             current_tag = elem.tag.replace(ns,'')
             path.append(current_tag)
-            # Test to find all tags under 'protein'
-        # Remove when finished
         
         elif event == 'end':
             # process the tag
             if elem.tag == (ns + 'name') and path == name_path:
-                protein_attributes['/'.join(path)] = elem.text
-                #all_names.append(elem.text+':'+str(index))
-                bisect.insort_left(all_names,elem.text.lower()+':::'+str(index))
+                short_path = [x for x in path if x not in extra_path]
+                protein_attributes['/'.join(short_path)] = elem.text
+                all_names.append(elem.text.lower()+':::'+str(index))
 
             elif elem.tag == (ns + 'protein'):
                 protein_attributes = parse_protein(elem,protein_attributes,path)
-                entries.append(protein_attributes)
-                protein_attributes = dict()
+                
                 #index += 1
+            
+            elif elem.tag == (ns + 'organism'):
+                organism_attributes = parse_protein(elem,organism_attributes,path) 
 
             elif elem.tag == (ns + 'entry'):
                 elem.clear()
-                # try increment index after clearing last entry
+
                 index += 1
+                entries.append((protein_attributes,organism_attributes))
+                protein_attributes = dict()
+                organism_attributes = dict()
             path.pop()
     
-    #all_names = sorted(all_names)
-    #all_names = [x.lower() for x in all_names]
+    #Change to desired path
+    pickle.dump(entries,open("protein_dict.p","wb"))
+    pickle.dump(all_names,open("names_list.p","wb"))
 
-    return entries,all_names
 
-
-entries,all_names = UNIPROT_parse(file3)
-pickle.dump(entries,open("C:/Users/cjaik/Documents/vscode/protein_dict.p","wb"))
-pickle.dump(all_names,open("C:/Users/cjaik/Documents/vscode/names_list.p","wb"))
+UNIPROT_parse(file2)
