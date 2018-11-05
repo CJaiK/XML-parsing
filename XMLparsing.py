@@ -1,5 +1,6 @@
 import numpy as np
 import xml.etree.ElementTree as ET
+import re
 
 #Read XML file and organizes all citations into two table based on type
 def parse_all_citations(citations):
@@ -105,14 +106,26 @@ def parse_all_tables(data):
 
         #Start of the table dat
         tab_start = tgroup.find('tbody')
-
+        
+        # read input for each entry and assign to value
+        value = ''
         for row in tab_start.findall('row'):
             for entry in row.findall('entry'):
-                tab_row[index] = entry.text
+                if entry.text != None and re.search('[a-zA-Z0-9]',entry.text):
+                    value = entry.text
+                for child in list(entry):
+                    if child.tag == 'chemistry':
+                        value = child.get('id')
+                    if child.text != None and re.search('[a-zA-Z0-9]',child.text):
+                        value += child.text
+                    if child.tail != None and re.search('[a-zA-Z0-9]',child.tail):
+                        value += child.tail
+                tab_row[index] = value
+                value = ''
                 index+=1
-            #Append row to table
+            #Append row to table and reset row
             current_table = np.vstack((current_table,tab_row))
-
+            tab_row = np.empty([num_col], dtype=object)
             index = 0
 
         all_tables[table_name] = current_table
@@ -129,7 +142,7 @@ def parse_all_tables(data):
 
             for tables in p.findall('tables'):
 
-                table_name = tables.get('id')
+                table_name = tables.get('num')
                 table = tables.find('table')
 
                 if table != None:
@@ -148,7 +161,7 @@ def parse_all_tables(data):
 
 #Sets up XML file to be parsed; takes filename as argument
 def xml_parse(file_name):
-    global patcit_table, nplcit_table, all_tables
+    
     
     #tree = ET.parse('US09670210-20170606.XML')
     tree = ET.parse(file_name)
@@ -165,3 +178,9 @@ def xml_parse(file_name):
     patcit_table, nplcit_table = parse_all_citations(citations)
 
     all_tables = parse_all_tables(data)
+
+    return patcit_table, nplcit_table, all_tables
+
+patcit, nplcit, tables = xml_parse('C:/Users/cjaik/Desktop/Research/Parse Script/US09670204-20170606.xml')
+
+print(tables['00004'])
