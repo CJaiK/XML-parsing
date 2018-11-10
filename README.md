@@ -20,5 +20,4 @@ protein_search.py:
   
   Steps: 
   1. Find variable, FILE_PATH, and set to path of pickle files
-  2. When prompt 'Search: ' appears, enter desired name; can use any desired attribute (name, ecnumber, etc)
-  3. Function prints all occurences of searched item; some searches are too much to be displayed in terminal.
+  2. Call function, search(name), where 'name' is desired search term.
