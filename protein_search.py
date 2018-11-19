@@ -1,6 +1,5 @@
 import pickle
 import time
-# closure, clojure, scheme/lisp, haskell
 
 def create_search_fn():
     
