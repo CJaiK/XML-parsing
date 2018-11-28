@@ -1,4 +1,16 @@
 # XML-parsing
+patent_parse.py:
+  - File formerly named XMLparse.py
+  - Takes patent XML and collects introduction, citations, and tables
+  
+  Steps:
+  1. Call function, patent_parse(file_name), where 'file_name' is the path of patent XML file
+  2. patent_parse(file_name) returns 'patcit', 'nplcit', 'tables', 'intro' in this order.
+    a. patcit: array containing patcit citations
+    b. nplcit: array containing nplcit citations
+    c. tables: dictionary containing all tables. To get specific table, use num attribute (ex table['0004'] gets table 4)
+
+
 
 UNIPROT_parse.py:
   -Program takes directory to UNIPROT dataset
