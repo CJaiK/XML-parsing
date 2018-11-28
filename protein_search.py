@@ -1,5 +1,6 @@
 import pickle
 import time
+# closure, clojure, scheme/lisp, haskell
 
 def create_search_fn():
     
@@ -46,6 +47,7 @@ def create_search_fn():
                     keyword_occurence.add(int(indices_only[name_i]))
             
             if len(keyword_occurence) == 0:
+                print('found nothing')
                 return None
 
             indices += list(keyword_occurence)
@@ -73,3 +75,16 @@ def create_search_fn():
         return result_lists
     
     return search_fn
+
+
+search = create_search_fn()
+start = time.time()
+want = search([['factor','d']])
+
+#diff = [x for x in want[0] if x not in want[1]]
+#print(diff)
+end = time.time()
+print(len(want[0]))
+print(want[0][0])
+
+print(end-start)
