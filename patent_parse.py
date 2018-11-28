@@ -286,6 +286,3 @@ patcit, nplcit, tables, intro, summary, compound_list = patent_parse('C:/Users/c
 
 
 print(compound_list)
-
-#look for small element names by subscript element
-# get catalog of sections see if there is a way to get other sections
