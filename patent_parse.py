@@ -2,8 +2,23 @@ import numpy as np
 import xml.etree.ElementTree as ET
 import re
 
+def get_chem_compounds(section,compound_list):
+    
+
+    word_list = section.split(' ')
+    for word in word_list:
+        
+        # Look for character signaling compound
+        if '^' in word:
+            word = re.sub('[^a-zA-Z0-9-,()^*\/]','',word)
+            compound_list.append(word)
+        
+    return compound_list
+        
+
+        
 #Read XML file and collect introduction (Background)
-def parse_introduction(data):
+def parse_introduction(data,compound_list):
 
     intro = ''
 
@@ -18,14 +33,66 @@ def parse_introduction(data):
             start = True
         
         #Body of introduction
-        elif elem.tag == 'p' and start:
-            intro += elem.text
+        elif elem.tag == 'p' and start and elem.text != None and re.search('[a-zA-Z0-9]',elem.text):
+
+            for child in elem.iter():
+                if (child.tag == 'sub' or child.tag == 'sup') and child.text != None and re.search('[a-zA-Z0-9]',child.text):
+                    intro += '^'+child.text+'*'
+                elif child.text != None and re.search('[a-zA-Z0-9]',child.text):
+                    if child.text[-1] == '.':
+                        intro += child.text + ' '
+                    else:
+                        intro += child.text
+
+                if child.tail != None and re.search('[a-zA-Z0-9]',child.tail):
+                    intro += child.tail
         
         #If introduction already found, exit loop
         elif elem.tag == 'heading' and start:
             break
 
-    return intro
+    # Get compounds from intro
+    compound_list = get_chem_compounds(intro,compound_list)
+    
+    return intro, compound_list
+
+def parse_summary(data, compound_list):
+
+    summary = ''
+
+    #Flag indicating if introduction found
+    start = False
+
+    #Search for 'p' section with introduction
+    for elem in data:
+
+        #Start of introduction
+        if elem.tag == 'heading' and 'summary' in elem.text.lower():
+            start = True
+        
+        #Body of introduction
+        elif elem.tag == 'p' and start and elem.text != None and re.search('[a-zA-Z0-9]',elem.text):
+ 
+            for child in elem.iter():
+                if child.tag == 'sub' and child.text != None and re.search('[a-zA-Z0-9]',child.text):
+                    summary += '^'+child.text+'*'
+                elif child.text != None and re.search('[a-zA-Z0-9]',child.text):
+                    if child.text[-1] == '.':
+                        summary += child.text + ' '
+                    else:
+                        summary += child.text
+
+                if child.tail != None and re.search('[a-zA-Z0-9]',child.tail):
+                    summary += child.tail
+
+        #If introduction already found, exit loop
+        elif elem.tag == 'heading' and start:
+            break
+
+    # Get compounds from summary
+    compound_list = get_chem_compounds(summary,compound_list)
+
+    return summary, compound_list
 
 #Read XML file and organizes all citations into two table based on type
 def parse_all_citations(citations):
@@ -186,13 +253,9 @@ def parse_all_tables(data):
     return all_tables
 
 #Sets up XML file to be parsed; takes filename as argument
-def xml_parse(file_name):
+def patent_parse(file_name):
     
-    
-    #tree = ET.parse('US09670210-20170606.XML')
     tree = ET.parse(file_name)
-
-
     root = tree.getroot()
 
     #Start of citations
@@ -201,16 +264,28 @@ def xml_parse(file_name):
     #Section containing tables and introduction
     data = root.find('description')
 
+    #List of compounds from intro and summary
+    compound_list = []
+
     #Parse intro and remove citations
-    intro = parse_introduction(data)
+    intro, compound_list = parse_introduction(data,compound_list)
     intro = re.sub(r'\s\([a-zA-Z,.\s&]*\s*\d{4}[\)]','',intro)
+
+    #Get summary of invention
+    summary, compound_list = parse_summary(data,compound_list)
 
     patcit_table, nplcit_table = parse_all_citations(citations)
 
     all_tables = parse_all_tables(data)
 
-    return patcit_table, nplcit_table, all_tables, intro
+    return patcit_table, nplcit_table, all_tables, intro, summary, compound_list
 
-patcit, nplcit, tables, intro = xml_parse('C:/Users/cjaik/Desktop/Research/Parse Script/US09670204-20170606.xml')
 
-print(intro)
+# How to call function
+patcit, nplcit, tables, intro, summary, compound_list = patent_parse('C:/Users/cjaik/Documents/vscode/bergen.leon/US09688642-20170627.xml')
+
+
+print(compound_list)
+
+#look for small element names by subscript element
+# get catalog of sections see if there is a way to get other sections
