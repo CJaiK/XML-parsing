@@ -7,15 +7,12 @@ import bisect
 
 # when ec number encountered, attach to last FULLNAME
 # Information about each entry 
-file1 = 'C:/Users/cjaik/Documents/vscode/largetest.xml'
-file2 = 'C:/Users/cjaik/Documents/vscode/largetest2.xml'
-file3 = 'C:/Users/cjaik/Documents/vscode/uniprot_sprot.xml'
 
 def UNIPROT_parse(file_name):
 
     # Path to directory of pickled variables
     # TODO
-    FILE_PATH = 'C:/Users/cjaik/Documents/vscode/'
+    FILE_PATH = 'dictionaries/'
 
     protein_attributes = dict() # Dictionary entry for protein names
     organism_attributes = dict() # Dictionary entry for organism name

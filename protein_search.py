@@ -7,7 +7,7 @@ def create_search_fn():
     
     # Path to deirectory of pickled variables
     # TODO
-    FILE_PATH = 'C:/Users/cjaik/Documents/vscode/'
+    FILE_PATH = 'dictionaries/'
 
     # Load variables from disk
     

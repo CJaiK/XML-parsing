@@ -282,7 +282,7 @@ def patent_parse(file_name):
 
 
 # How to call function
-patcit, nplcit, tables, intro, summary, compound_list = patent_parse('C:/Users/cjaik/Documents/vscode/bergen.leon/US09688642-20170627.xml')
+patcit, nplcit, tables, intro, summary, compound_list = patent_parse('patents/US09688642-20170627.xml')
 
 
 print(compound_list)
