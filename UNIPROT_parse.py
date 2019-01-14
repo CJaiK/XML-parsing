@@ -4,6 +4,11 @@ import re
 import pickle
 import bisect
 
+# Output structure:
+# (
+#   { 'protein-info': [], ... },
+#   { 'organism-info': [], ... }
+# )
 
 # when ec number encountered, attach to last FULLNAME
 # Information about each entry 
