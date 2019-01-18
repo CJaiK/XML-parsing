@@ -41,3 +41,10 @@ protein_search.py:
                1: partial word search, can appear in any field
                2: all words must appear in same field
   
+wiki_text.py
+  -Function used to scrape text from a wikipedia page, along with all pages linked in the initial page
+  
+  Steps:
+  1. change variable, DIR, to directory where text file should be saved
+  2. Call function, wiki_scrape(page), where page is the title of the wikipedia page
+  3. Text is stored in file called 'wikitext.txt' in the specified directory
