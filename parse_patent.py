@@ -92,12 +92,59 @@ class XMLDoc:
                 
         return nplcit_table
 
+
+#function looks for keyword in sections. If keyword encountered, collects the next n sentences
+# defined by num_sentences 
+def keyword_section(doc, keyword, num_sentences):
+    sentences = ''
+    
+    if doc.abstract:
+        abstract = doc.abstract.split('.')
+        for s in abstract:
+            if keyword in s and s not in sentences:
+                num_collected = 0
+                index = abstract.index(s)
+                while(index < len(abstract) and num_collected < num_sentences):
+                    sentences += s
+                    num_collected += 1
+                    index += 1
+
+    if doc.intro:
+        intro = doc.intro.split('.')
+        for s in intro:
+            if keyword in s and s not in sentences:
+                num_collected = 0
+                index = intro.index(s)
+                while(index < len(intro) and num_collected < num_sentences):
+                    sentences += s
+                    num_collected += 1
+                    index += 1
+
+    if doc.summary:
+        summary = doc.summary.split('.')
+        for s in summary:
+            if keyword in s and s not in sentences:
+                num_collected = 0
+                index = summary.index(s)
+                while(index < len(summary) and num_collected < num_sentences):
+                    sentences += s
+                    num_collected += 1
+                    index += 1
+    
+    return sentences
+
 if __name__ == '__main__':
     try:
         filename = sys.argv[1]
         doc = XMLDoc(filename, title=True, abstract=True, intro=True, citations=True)
-        print(doc.title)
-        print(doc.abstract)
+        #print(doc.title)
+        #print(doc.abstract)
+
+        # find sentences that surround keyword
+        keyword = 'invention'
+        num_sentences = 2
+        sentences = keyword_section(doc,keyword,num_sentences)
+        print(sentences)
         #print("\n".join(doc.nplcit_table))
     except:
         print('Usage: python parse_patent.py patent_file.xml')
