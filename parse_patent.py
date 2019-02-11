@@ -96,6 +96,8 @@ class XMLDoc:
 #function looks for keyword in sections. If keyword encountered, collects the next n sentences
 # defined by num_sentences 
 def keyword_section(doc, keyword, num_sentences):
+
+    # compiles sentences that contain or surround keyword
     sentences = ''
     
     if doc.abstract:
@@ -137,14 +139,13 @@ if __name__ == '__main__':
     try:
         filename = sys.argv[1]
         doc = XMLDoc(filename, title=True, abstract=True, intro=True, citations=True)
-        #print(doc.title)
-        #print(doc.abstract)
+        print(doc.title)
+        print(doc.abstract)
 
         # find sentences that surround keyword
-        keyword = 'invention'
-        num_sentences = 2
+        keyword = 'invention'   # keyword
+        num_sentences = 2   # number of subsequent sentences to collect
         sentences = keyword_section(doc,keyword,num_sentences)
-        print(sentences)
-        #print("\n".join(doc.nplcit_table))
+        
     except:
         print('Usage: python parse_patent.py patent_file.xml')
