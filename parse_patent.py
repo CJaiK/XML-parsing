@@ -3,9 +3,10 @@ import re
 import sys
 
 class XMLDoc:
-    def __init__(self, filename, title=False, abstract=False,intro=False, tables=False, citations=False):
+    def __init__(self, filename, title=False, abstract=False,intro=False, tables=False, citations=False, no_headers=False):
         self.title = ""
         self.abstract = ""
+        self.all_text = ""
         self.intro = self.summary = ""
         self.tables = None
         self.nplcit_table = []
@@ -23,12 +24,15 @@ class XMLDoc:
         if abstract:
             self.abstract = self.parse_abstract()
         if intro:
-            self.intro = self.parse_section("background")
+            self.intro = self.parse_section(header="background")
             self.intro = re.sub(r'\s\([a-zA-Z,.\s&]*\s*\d{4}[\)]','',self.intro)
-            self.summary = self.parse_section("summary")
+            self.summary = self.parse_section(header="summary")
             self.summary = re.sub(r'\s\([a-zA-Z,.\s&]*\s*\d{4}[\)]','',self.summary)
-        if tables:
-            self.tables = self.parse_all_tables()
+        if no_headers:
+            self.all_text = self.parse_whole()
+            print('after no header')
+        #if tables:
+        #   self.tables = self.parse_all_tables()
         if citations and self.citations:
             self.nplcit_table = self.parse_citations()
 
@@ -40,13 +44,32 @@ class XMLDoc:
                 abstract += elem.text
 
         return abstract
+    
+    def parse_whole(self):
+        section = ''
+
+        for elem in self.data:
+            if elem.text == None:
+                continue
+            if elem.tag == 'p' and re.search('[a-zA-Z0-9]',elem.text):
+                for child in elem.iter():
+                    if (child.tag in ['sub', 'sup']) and child.text != None and re.search('[a-zA-Z0-9]',child.text):
+                        section += '^'+child.text+'*'
+                    elif child.text != None and re.search('[a-zA-Z0-9]',child.text):
+                        section += child.text
+                        if child.text[-1] == '.':
+                            section += ' '
+
+                    if child.tail != None and re.search('[a-zA-Z0-9]',child.tail):
+                        section += child.tail
+        return section
 
     #Read XML file and collect introduction (Background)
     def parse_section(self, header):
         section = ''
-
         #Flag indicating if introduction found
         start = False #Search for 'p' section with introduction
+
         for elem in self.data:
 
             #If introduction already found, exit loop
@@ -71,8 +94,7 @@ class XMLDoc:
                             section += ' '
 
                     if child.tail != None and re.search('[a-zA-Z0-9]',child.tail):
-                        section += child.tail
-            
+                        section += child.tail    
         return section 
  
 
@@ -138,14 +160,15 @@ def keyword_section(doc, keyword, num_sentences):
 if __name__ == '__main__':
     try:
         filename = sys.argv[1]
-        doc = XMLDoc(filename, title=True, abstract=True, intro=True, citations=True)
-        print(doc.title)
-        print(doc.abstract)
+        doc = XMLDoc(filename, title=True, abstract=True, intro=True, citations=True, no_headers=True)
+        print(doc.all_text)
+        #print(doc.abstract)
+        #print(doc.text)
 
         # find sentences that surround keyword
-        keyword = 'invention'   # keyword
-        num_sentences = 2   # number of subsequent sentences to collect
-        sentences = keyword_section(doc,keyword,num_sentences)
+        #keyword = 'invention'   # keyword
+        #num_sentences = 2   # number of subsequent sentences to collect
+        #sentences = keyword_section(doc,keyword,num_sentences)
         
     except:
         print('Usage: python parse_patent.py patent_file.xml')
